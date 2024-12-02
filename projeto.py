@@ -38,6 +38,7 @@ class Planeta:
         self.raio = raio
         self.pos_x = posicao[0]
         self.pos_y = posicao[1]
+        self.trajetoria = []
 
     # Calcular a força gravitacional do planeta com todos os outros planetas
     def calcular_forcas(self, planetas):
@@ -73,9 +74,13 @@ class Planeta:
         y = self.pos_y * escala + deslocamento[1]
 
         raio = self.raio * escala * 1000 # fora da escala por motivos visuais
+        self.trajetoria.append((self.pos_x, self.pos_y))
         pygame.draw.circle(JANELA, self.cor, (x, y), raio)
-
-
+        if len(self.trajetoria) >= 2:
+            pontos = []
+            for ponto in self.trajetoria:
+                pontos.append((ponto[0] * escala + deslocamento[0], ponto[1] * escala + deslocamento[1]))
+            pygame.draw.lines(JANELA, self.cor, False, pontos)
 
     def checar_colisoes(self, planetas):
         for planeta in planetas:
@@ -133,9 +138,9 @@ def main():
     escala = ESCALA_INICIAL
 
     # testes
-    planetas = [Planeta(6e30, AZUL, (29.8e3, 0), 6.4e7, (COMPRIMENTO / 2 / escala, (ALTURA / 2 + 150) / escala)),
-                Planeta(2e30, AMARELO, (0, 0), 7e7, (COMPRIMENTO / 2 / escala, ALTURA / 2 / escala)),
-                Planeta(5e30, VERMELHO, (30e2, -25e2), 4e7, (COMPRIMENTO / 2 / escala, (ALTURA / 2 - 150) / escala))]
+    planetas = [Planeta(6e30, AZUL, (-12.8e3, -1e4), 6.4e7, (COMPRIMENTO / 2 / escala, (ALTURA / 2 + 150) / escala)),
+                Planeta(2e30, AMARELO, (30e3, 0), 7e7, (COMPRIMENTO / 2 / escala, ALTURA / 2 / escala)),
+                Planeta(5e30, VERMELHO, (50e2, -25e2), 4e7, (COMPRIMENTO / 2 / escala, (ALTURA / 2 - 200) / escala))]
     while rodando:
         clock.tick(FPS)
         for event in pygame.event.get():
