@@ -64,16 +64,28 @@ class Planeta:
         self.vel_x += acel_x * TEMPO_POR_ETAPA
         self.vel_y += acel_y * TEMPO_POR_ETAPA
 
-    def atualizar_posicao(self, deslocamento, escala):
+    def atualizar_posicao(self):
         self.pos_x += self.vel_x * TEMPO_POR_ETAPA
         self.pos_y += self.vel_y * TEMPO_POR_ETAPA
 
+    def imprimir(self, deslocamento, escala):
         x = self.pos_x * escala + deslocamento[0]
         y = self.pos_y * escala + deslocamento[1]
 
         raio = self.raio * escala * 1000 # fora da escala por motivos visuais
         pygame.draw.circle(JANELA, self.cor, (x, y), raio)
-        # print(x, y)
+
+
+
+    def checar_colisoes(self, planetas):
+        for planeta in planetas:
+            if planeta != self:
+                dx = planeta.pos_x - self.pos_x
+                dy = planeta.pos_y - self.pos_y
+                dist = sqrt(dx*dx + dy*dy)
+                if dist <= (self.raio + planeta.raio) * 1000:
+                    return True
+        return False
 
 def modificar_estado_teclas(teclas, event, escala, deslocamento):
      
@@ -114,6 +126,7 @@ def mover_tela(deslocamento, teclas):
 
 def main():
     rodando = True
+    colisao = False
     clock = pygame.time.Clock()
     deslocamento = [0, 0]
     teclas_seguradas = [False, False, False, False] # up, down, left, right
@@ -125,19 +138,26 @@ def main():
                 Planeta(5e30, VERMELHO, (30e2, -25e2), 4e7, (COMPRIMENTO / 2 / escala, (ALTURA / 2 - 150) / escala))]
     while rodando:
         clock.tick(FPS)
-        JANELA.fill(PRETO)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 rodando = False
             if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:  # Verifica se uma tecla foi pressionada ou soltada
                 escala = modificar_estado_teclas(teclas_seguradas, event, escala, deslocamento)
+        JANELA.fill(PRETO)
         mover_tela(deslocamento, teclas_seguradas)
+        if not colisao:
+            for planeta in planetas:
+                forca = planeta.calcular_forcas(planetas)
+                planeta.atualizar_velocidade(forca)
         for planeta in planetas:
-            forca = planeta.calcular_forcas(planetas)
-            planeta.atualizar_velocidade(forca)
-        for planeta in planetas:
-            planeta.atualizar_posicao(deslocamento, escala)
+            if not colisao:
+                planeta.atualizar_posicao()
+                if planeta.checar_colisoes(planetas):
+                    colisao = True
+            planeta.imprimir(deslocamento, escala)
+                
         pygame.display.update()
+
     pygame.quit()
 
 
