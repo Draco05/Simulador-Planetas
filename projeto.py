@@ -13,7 +13,7 @@ G = 6.67408e-11  # N m^2 / Kg^2
 AU = 1.49597e11  # m
 TEMPO_POR_ETAPA = 3600  # 1 hora
 ESCALA_INICIAL = 1000/AU  # 1000 pixels por AU
-FPS = 60  # 60 dias por segundo
+FPS = 60  # frames por segundo
 
 # Cores
 PRETO = pygame.Color(0, 0, 0)
@@ -30,7 +30,6 @@ JANELA = pygame.display.set_mode((COMPRIMENTO, ALTURA))
 pygame.display.set_caption("Simulador do Problema dos 3 Corpos")
 
 # Botões utilizados
-add_butao = pygame.font.SysFont("Arial", 20).render("Adicionar Planeta", True, BRANCO)
 pause_botao = pygame.font.SysFont("Arial", 20).render("Modo: Pause", True, BRANCO)
 reset_botao = pygame.font.SysFont("Arial", 20).render("Resetar", True, BRANCO)
 colisao_botao = pygame.font.SysFont("Arial", 20).render("Modo: Colisão", True, BRANCO)
@@ -193,7 +192,7 @@ def adicionar_planeta(escala, deslocamento):
     return Planeta(massa, cor, (vel_x, vel_y), raio, (x, y))
 
 # tratamento dos eventos do pygame
-def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_add, modo_sem_colisao):
+def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_sem_colisao):
     # argumentos:
     #   teclas: lista de quais teclas estão atualmente pressioanadas
     #   event: evento do pygame
@@ -203,7 +202,6 @@ def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao
     #   planetas: lista de todos os planetas
     #   colisão: boleano que representa se ocorreu colisão ou não
     #   botoes: lista de botões e suas características
-    #   modo_add: booleano que representa se o modo de adicionar planetas está ativado ou não
     #   modo_sem_colisão: booleano que representa se o modo de não considerar colisões está ativado ou não 
     #
     # retorna:
@@ -211,7 +209,6 @@ def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao
     #   pause: novo estado do pause
     #   colisao: novo estado da colisão
     #   rodando: se está rodando ou não
-    #   modo_add: novo estado do modo_add
     #   modo_sem_colisao: novo estado do modo_sem_colisão
 
     rodando = True
@@ -257,37 +254,32 @@ def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao
             # checa se o clique foi em um botão e faz a ação correspondente
             if botao[1][0] <= mouse_pos[0] <= botao[1][0] + botao[1][2] and botao[1][1] <= mouse_pos[1] <= botao[1][1] + botao[1][3]:
                 if idx == 0:
-                    # muda de estado o modo_add
-                    modo_add = not modo_add
-                    break
-                if idx == 1:
                     # muda de estado o pause e troca o texto do botão
                     pause = not pause
-                    botoes[1] = (pygame.font.SysFont("Arial", 20).render(f"Modo: {'Pause' if pause else 'Play'}", True, BRANCO), botao[1], botao[2])
+                    botoes[0] = (pygame.font.SysFont("Arial", 20).render(f"Modo: {'Pause' if pause else 'Play'}", True, BRANCO), botao[1], botao[2])
                     break
-                if idx == 2:
+                if idx == 1:
                     # resetar as informações necessárias
                     planetas.clear()
                     deslocamento[0] = 0
                     deslocamento[1] = 0
                     escala = ESCALA_INICIAL
                     pause = True
-                    botoes[1] = (pause_botao, botoes[1][1], botoes[1][2])
+                    botoes[0] = (pause_botao, botoes[0][1], botoes[0][2])
                     colisao = False
                     break
-                if idx == 3:
+                if idx == 2:
                     # muda de estado o modo_sem_colisão e troca o texto do botão
                     modo_sem_colisao = not modo_sem_colisao
-                    botoes[3] = (pygame.font.SysFont("Arial", 20).render(f"Modo: {'Sem ' if modo_sem_colisao else ''}Colisão", True, BRANCO), botao[1], 0 if modo_sem_colisao else 25)
+                    botoes[2] = (pygame.font.SysFont("Arial", 20).render(f"Modo: {'Sem ' if modo_sem_colisao else ''}Colisão", True, BRANCO), botao[1], 0 if modo_sem_colisao else 25)
                     break
         else:
-            # adiciona planeta caso não foi clicado em nenhum botão e modo_add está ativado
-            if modo_add:
-                planetas.append(adicionar_planeta(escala, deslocamento))
+            # adiciona planeta caso não foi clicado em nenhum botão
+            planetas.append(adicionar_planeta(escala, deslocamento))
     # checa se clicou o botão de fechar janela
     elif event.type == pygame.QUIT:
         rodando = False
-    return escala, pause, colisao, rodando, modo_add, modo_sem_colisao
+    return escala, pause, colisao, rodando, modo_sem_colisao
 
 # move o referencial da tela
 def mover_tela(deslocamento, teclas):
@@ -301,7 +293,6 @@ def main():
     rodando = True
     colisao = False 
     pause = True
-    modo_add = False
     modo_sem_colisao = False
     deslocamento = [0, 0]
     teclas_seguradas = [False, False, False, False] # up, down, left, right
@@ -309,7 +300,7 @@ def main():
     raio_explosao = 1
     coords_explosao = []
     planetas = []
-    botoes = [(add_butao, [40, ALTURA - 50, 150, 50], 10), (pause_botao, [230, ALTURA - 50, 150, 50], 25), (reset_botao, [420, ALTURA - 50, 150, 50], 40), (colisao_botao, [610, ALTURA-50, 150, 50], 25)]
+    botoes = [(pause_botao, [87, ALTURA - 50, 150, 50], 25), (reset_botao, [324, ALTURA - 50, 150, 50], 40), (colisao_botao, [561, ALTURA-50, 150, 50], 25)]
     clock = pygame.time.Clock()
 
     while rodando:
@@ -317,7 +308,7 @@ def main():
         mouse_pos = pygame.mouse.get_pos()
         # tratamento dos eventos do pygame
         for event in pygame.event.get():
-            escala, pause, colisao, rodando, modo_add, modo_sem_colisao = tratar_eventos(teclas_seguradas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_add, modo_sem_colisao)
+            escala, pause, colisao, rodando, modo_sem_colisao = tratar_eventos(teclas_seguradas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_sem_colisao)
         # coloca o fundo de preto
         JANELA.fill(PRETO)
         # move o referencial da tela
