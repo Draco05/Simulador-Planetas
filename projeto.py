@@ -192,7 +192,7 @@ def adicionar_planeta(escala, deslocamento):
     return Planeta(massa, cor, (vel_x, vel_y), raio, (x, y))
 
 # tratamento dos eventos do pygame
-def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_sem_colisao):
+def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_sem_colisao, raio_explosao):
     # argumentos:
     #   teclas: lista de quais teclas estão atualmente pressioanadas
     #   event: evento do pygame
@@ -203,6 +203,7 @@ def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao
     #   colisão: boleano que representa se ocorreu colisão ou não
     #   botoes: lista de botões e suas características
     #   modo_sem_colisão: booleano que representa se o modo de não considerar colisões está ativado ou não 
+    #   raio_explosão: o tamanho do raio da explosão após a colisão
     #
     # retorna:
     #   escala: nova escala
@@ -210,6 +211,7 @@ def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao
     #   colisao: novo estado da colisão
     #   rodando: se está rodando ou não
     #   modo_sem_colisao: novo estado do modo_sem_colisão
+    #   raio_explosão: novo tamanho do raio
 
     rodando = True
 
@@ -263,6 +265,7 @@ def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao
                     planetas.clear()
                     deslocamento[0] = 0
                     deslocamento[1] = 0
+                    raio_explosao = 1
                     escala = ESCALA_INICIAL
                     pause = True
                     botoes[0] = (pause_botao, botoes[0][1], botoes[0][2])
@@ -279,7 +282,7 @@ def tratar_eventos(teclas, event, escala, deslocamento, pause, planetas, colisao
     # checa se clicou o botão de fechar janela
     elif event.type == pygame.QUIT:
         rodando = False
-    return escala, pause, colisao, rodando, modo_sem_colisao
+    return escala, pause, colisao, rodando, modo_sem_colisao, raio_explosao
 
 # move o referencial da tela
 def mover_tela(deslocamento, teclas):
@@ -308,7 +311,7 @@ def main():
         mouse_pos = pygame.mouse.get_pos()
         # tratamento dos eventos do pygame
         for event in pygame.event.get():
-            escala, pause, colisao, rodando, modo_sem_colisao = tratar_eventos(teclas_seguradas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_sem_colisao)
+            escala, pause, colisao, rodando, modo_sem_colisao, raio_explosao = tratar_eventos(teclas_seguradas, event, escala, deslocamento, pause, planetas, colisao, botoes, modo_sem_colisao, raio_explosao)
         # coloca o fundo de preto
         JANELA.fill(PRETO)
         # move o referencial da tela
